@@ -30,3 +30,25 @@ body {
 .table-cell {
   @apply px-4 py-3 text-sm text-gray-700 border-t border-gray-100;
 }
+
+/* Print: when a payslip modal is open, show only the payslip. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .payslip-print,
+  .payslip-print * {
+    visibility: visible;
+  }
+  .payslip-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

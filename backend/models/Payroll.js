@@ -6,7 +6,11 @@ const payrollSchema = new mongoose.Schema(
     month: { type: Number, required: true, min: 1, max: 12 },
     year: { type: Number, required: true },
     baseSalary: { type: Number, required: true },
-    deductions: { type: Number, default: 0 },
+    providentFund: { type: Number, default: 0 },
+    tax: { type: Number, default: 0 },
+    unpaidLeaveDeduction: { type: Number, default: 0 },
+    unpaidLeaveDays: { type: Number, default: 0 },
+    deductions: { type: Number, default: 0 }, // other/manual deductions
     bonuses: { type: Number, default: 0 },
     netPay: { type: Number, required: true },
     status: {

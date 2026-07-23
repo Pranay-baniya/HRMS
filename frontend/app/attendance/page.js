@@ -59,6 +59,32 @@ export default function AttendancePage() {
     }
   };
 
+  const handleMarkAbsentees = async () => {
+    if (!confirm("Mark all un-recorded active employees as absent/leave for today?")) return;
+    try {
+      const res = await api.post("/attendance/mark-absentees", {});
+      alert(`${res.created} record(s) created for ${res.date}.`);
+      loadAll();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSetStatus = async (record, status) => {
+    try {
+      await api.post("/attendance/mark", {
+        employee: record.employee?._id || record.employee,
+        date: record.date,
+        status,
+      });
+      loadAll();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const STATUSES = ["present", "late", "absent", "half_day", "leave"];
+
   return (
     <PageShell title="Attendance">
       <div className="card mb-6 flex items-center gap-4">
@@ -109,7 +135,12 @@ export default function AttendancePage() {
 
       {isManager && (
         <>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">Team Attendance</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-gray-500">Team Attendance</h2>
+            <button className="btn-secondary text-xs" onClick={handleMarkAbsentees}>
+              Mark today's absentees
+            </button>
+          </div>
           <div className="card p-0 overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -139,7 +170,19 @@ export default function AttendancePage() {
                       <td className="table-cell">
                         {r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : "-"}
                       </td>
-                      <td className="table-cell capitalize">{r.status.replace("_", " ")}</td>
+                      <td className="table-cell">
+                        <select
+                          className="text-xs border border-gray-200 rounded-md px-2 py-1 capitalize"
+                          value={r.status}
+                          onChange={(e) => handleSetStatus(r, e.target.value)}
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s.replace("_", " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
                     </tr>
                   ))
                 )}

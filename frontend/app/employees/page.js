@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import PageShell from "../../components/PageShell";
 import { api } from "../../lib/api";
 
@@ -185,8 +186,10 @@ export default function EmployeesPage() {
               employees.map((emp) => (
                 <tr key={emp._id}>
                   <td className="table-cell">
-                    <p className="font-medium text-gray-800">{emp.name}</p>
-                    <p className="text-xs text-gray-400">{emp.email}</p>
+                    <Link href={`/employees/${emp._id}`} className="group">
+                      <p className="font-medium text-gray-800 group-hover:text-brand">{emp.name}</p>
+                      <p className="text-xs text-gray-400">{emp.email}</p>
+                    </Link>
                   </td>
                   <td className="table-cell">{emp.department}</td>
                   <td className="table-cell capitalize">{emp.role?.replace("_", " ")}</td>

@@ -1,5 +1,6 @@
 import Project from "../models/Project.js";
 import Allocation from "../models/Allocation.js";
+import { notify } from "./notificationController.js";
 
 const UPDATABLE_FIELDS = ["name", "client", "description", "category", "status", "startDate", "endDate"];
 
@@ -70,6 +71,11 @@ export const createAllocation = async (req, res) => {
   try {
     const allocation = await Allocation.create(req.body);
     const populated = await allocation.populate("employee", "name email department role");
+    const project = await Project.findById(allocation.project).select("name");
+    await notify(allocation.employee, `You were allocated to ${project?.name || "a project"}`, {
+      type: "allocation",
+      link: `/projects/${allocation.project}`,
+    });
     res.status(201).json(populated);
   } catch (err) {
     res.status(400).json({ message: err.message });

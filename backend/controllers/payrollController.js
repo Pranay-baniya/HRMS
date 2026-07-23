@@ -1,5 +1,35 @@
 import Payroll from "../models/Payroll.js";
 import Employee from "../models/Employee.js";
+import Leave from "../models/Leave.js";
+import {
+  PROVIDENT_FUND_RATE,
+  computeTax,
+  daysInMonth,
+} from "../config/payrollConfig.js";
+
+// Count approved unpaid-leave days that fall within a given month.
+const unpaidLeaveDaysInMonth = async (employeeId, month, year) => {
+  const monthStart = new Date(year, month - 1, 1);
+  const monthEnd = new Date(year, month - 1, daysInMonth(month, year), 23, 59, 59);
+
+  const leaves = await Leave.find({
+    employee: employeeId,
+    type: "unpaid",
+    status: "approved",
+    startDate: { $lte: monthEnd },
+    endDate: { $gte: monthStart },
+  });
+
+  let days = 0;
+  for (const l of leaves) {
+    const from = new Date(Math.max(new Date(l.startDate), monthStart));
+    const to = new Date(Math.min(new Date(l.endDate), monthEnd));
+    from.setHours(0, 0, 0, 0);
+    to.setHours(0, 0, 0, 0);
+    days += Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+  }
+  return days;
+};
 
 export const generatePayroll = async (req, res) => {
   try {
@@ -8,7 +38,18 @@ export const generatePayroll = async (req, res) => {
     const employee = await Employee.findById(employeeId);
     if (!employee) return res.status(404).json({ message: "Employee not found" });
 
-    const netPay = employee.baseSalary - deductions + bonuses;
+    const baseSalary = employee.baseSalary;
+
+    // Unpaid-leave proration: subtract per-day pay for each approved unpaid-leave day.
+    const unpaidDays = await unpaidLeaveDaysInMonth(employeeId, month, year);
+    const perDay = baseSalary / daysInMonth(month, year);
+    const unpaidLeaveDeduction = Math.round(perDay * unpaidDays);
+
+    const grossAfterLeave = baseSalary - unpaidLeaveDeduction + bonuses;
+    const providentFund = Math.round(baseSalary * PROVIDENT_FUND_RATE);
+    const tax = computeTax(grossAfterLeave);
+
+    const netPay = grossAfterLeave - providentFund - tax - deductions;
 
     const payroll = await Payroll.findOneAndUpdate(
       { employee: employeeId, month, year },
@@ -16,7 +57,11 @@ export const generatePayroll = async (req, res) => {
         employee: employeeId,
         month,
         year,
-        baseSalary: employee.baseSalary,
+        baseSalary,
+        providentFund,
+        tax,
+        unpaidLeaveDeduction,
+        unpaidLeaveDays: unpaidDays,
         deductions,
         bonuses,
         netPay,

@@ -17,7 +17,12 @@
       "PowerShell(Start-Sleep -Seconds 3; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })",
       "PowerShell(try { Invoke-WebRequest -Uri http://localhost:4000/api/_migrate-roles-temp -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"ERROR: \" + $_.Exception.Message })",
       "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri \"http://localhost:4000/api/_temp-cleanup/6a5f60e35e4a2be2c1bb57b4/5bd7d12c-a717-4767-a258-a3b2f89e6aa7\" -Method Delete -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
-      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })"
+      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })",
+      "Bash(npm install *)",
+      "Bash(node --check server.js)",
+      "Bash(npx next *)",
+      "Bash(git check-ignore *)",
+      "Bash(git add *)"
     ]
   }
 }

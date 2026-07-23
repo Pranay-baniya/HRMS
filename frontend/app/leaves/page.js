@@ -11,6 +11,7 @@ export default function LeavesPage() {
   const { profile } = useAuth();
   const [myLeaves, setMyLeaves] = useState([]);
   const [pendingLeaves, setPendingLeaves] = useState([]);
+  const [balance, setBalance] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -21,6 +22,15 @@ export default function LeavesPage() {
     try {
       const data = await api.get("/leaves/me");
       setMyLeaves(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadBalance = async () => {
+    try {
+      const data = await api.get("/leaves/me/balance");
+      setBalance(data);
     } catch (err) {
       console.error(err);
     }
@@ -39,6 +49,7 @@ export default function LeavesPage() {
   useEffect(() => {
     loadMine();
     loadPending();
+    loadBalance();
   }, [profile]);
 
   const handleSubmit = async (e) => {
@@ -49,6 +60,7 @@ export default function LeavesPage() {
       setForm(emptyForm);
       setShowForm(false);
       loadMine();
+      loadBalance();
     } catch (err) {
       setError(err.message);
     }
@@ -59,7 +71,7 @@ export default function LeavesPage() {
       await api.put(`/leaves/${id}/review`, { status });
       loadPending();
     } catch (err) {
-      console.error(err);
+      alert(err.message);
     }
   };
 
@@ -122,6 +134,20 @@ export default function LeavesPage() {
             Submit Request
           </button>
         </form>
+      )}
+
+      {balance && (
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {Object.entries(balance.balances).map(([type, b]) => (
+            <div key={type} className="card">
+              <p className="text-xs text-gray-400 capitalize">{type} leave · {balance.year}</p>
+              <p className="text-2xl font-semibold text-gray-800 mt-1">
+                {b.remaining}
+                <span className="text-sm text-gray-400 font-normal"> / {b.entitlement} left</span>
+              </p>
+            </div>
+          ))}
+        </div>
       )}
 
       {isManager && (

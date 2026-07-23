@@ -3,6 +3,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -12,6 +14,13 @@ import attendanceRoutes from "./routes/attendanceRoutes.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import payrollRoutes from "./routes/payrollRoutes.js";
+import settingRoutes from "./routes/settingRoutes.js";
+import recruitmentRoutes from "./routes/recruitmentRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import onboardingRoutes from "./routes/onboardingRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 connectDB();
 
@@ -36,18 +45,35 @@ app.use(
     },
   })
 );
+app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "inseed-hrms-api" }));
 
-app.use("/api/auth", authRoutes);
+// Throttle auth endpoints to blunt credential-stuffing / brute-force attempts.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many auth attempts, please try again later" },
+});
+
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/payroll", payrollRoutes);
+app.use("/api/settings", settingRoutes);
+app.use("/api/recruitment", recruitmentRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/onboarding", onboardingRoutes);
+app.use("/api/documents", documentRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/reports", reportRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

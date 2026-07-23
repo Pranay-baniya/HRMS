@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --check controllers/authController.js)",
+      "PowerShell(node --check routes/authRoutes.js)",
+      "PowerShell(node --check config/supabaseAdmin.js)",
+      "PowerShell(node --check server.js)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 4000,3000 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(cd backend; Start-Process powershell -ArgumentList '-NoExit','-Command','npm run dev' -WindowStyle Hidden; Start-Sleep -Seconds 4; Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content)",
+      "PowerShell(Start-Sleep -Seconds 4; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "PowerShell(node _cleanup_test_signup.mjs)",
+      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri \"http://localhost:4000/api/_temp-cleanup/6a5e0f6363bb691ecead3c0c/ca571d1f-172b-437d-aacd-f6a0aec38e4d\" -Method Delete -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "PowerShell(Remove-Item _cleanup_test_signup.mjs -Force; Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "PowerShell(try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })",
+      "PowerShell(Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(Start-Sleep -Seconds 4; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })",
+      "PowerShell(Start-Sleep -Seconds 3; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })",
+      "PowerShell(try { Invoke-WebRequest -Uri http://localhost:4000/api/_migrate-roles-temp -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"ERROR: \" + $_.Exception.Message })",
+      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri \"http://localhost:4000/api/_temp-cleanup/6a5f60e35e4a2be2c1bb57b4/5bd7d12c-a717-4767-a258-a3b2f89e6aa7\" -Method Delete -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri http://localhost:4000/api/health -UseBasicParsing | Select-Object -ExpandProperty Content } catch { \"DOWN: \" + $_.Exception.Message })"
+    ]
+  }
+}
